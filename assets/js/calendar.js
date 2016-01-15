@@ -85,7 +85,7 @@ Datepicker = function(element){
 				document.write('<li class="empty">&nbsp;</li>');
 			} else if (day <= number_of_days_month) { 
 				if (year === selectedYear && month === selectedMonth && day === selectedDay) {
-					document.write('<li class="select">' + day + '</li>');
+					document.write('<li class="today">' + day + '</li>');
 					day++
 				} else {
 					document.write('<li>' + day + '</li>');
@@ -132,5 +132,3 @@ $(document).ready(function(){
 		console.log(selectedDate);
 	})
 });
-
-

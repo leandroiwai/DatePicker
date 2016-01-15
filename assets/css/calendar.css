@@ -4,6 +4,11 @@ body {
 	font-size: 11px;
 } 
 
+input {
+	width: 300px;
+	padding: 5px;
+}
+
 .wn_datepicker {
 }
 
@@ -26,8 +31,13 @@ body {
 	text-align: center;
 	line-height: 32px;
 }
-.wn_datepicker li.select {
+.wn_datepicker li.today {
 	background: #c00;
+	color: #fff;
+}
+
+.wn_datepicker li.select {
+	background: #f90;
 	color: #fff;
 }
 .wn_datepicker li.empty {
