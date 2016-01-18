@@ -20,28 +20,11 @@ Datepicker = function(element){
 	}
 
 	
-	// Get week names using locale settings
 
-	var findWeekDays = function(){
 
-		var newDate = new Date();
-		var weekDays = [];
-		while(newDate.getDay() > 0) {
-			newDate.setDate(newDate.getDate() + 1);
-		}
-
-		while(weekDays.length < 7) {
-		    weekDays.push(newDate.toLocaleString(locale, {weekday: 'short'}));
-		    newDate.setDate(newDate.getDate() + 1);
-		}
-
-		document.write('<ul>');
-		for(var i = 0; i < 7; i++) {
-			
-			document.write('<li>' + weekDays[i] + '</li>');
-
-		}
-		document.write('</ul>');
+	var printEmptyDays = function(element, index, array) {
+		console.log(element);
+		$('.wn_week_line').prepend(element);
 	}
 
 	var getFirstDay = function(year, month){
@@ -58,9 +41,10 @@ Datepicker = function(element){
 		var month_name = day.toLocaleString(locale, { month: "short" });
 
 		console.log('date picker initialized');
-		document.write('<div class="wn_datepicker">');
-		document.write('<div class="wn_datepicker_header">' + month_name + ' ' + year + '</div>');
-		findWeekDays();
+		var $wn_cal_wrap = $('<div class="wn_datepicker month' + month + '">');
+		var $wn_cal_header = $('<div class="wn_datepicker_header">' + month_name + ' ' + year + '</div>');
+
+
 		var first_day_month = getFirstDay(year, month);
 		console.log(month);
 		var number_of_days_month = new Date(year, month + 1, 0).getDate();
@@ -75,28 +59,70 @@ Datepicker = function(element){
 		console.log("month : " + selectedMonth);
 		console.log("year : " + selectedYear);
 
-		var day = 1;
+		// Get week names using locale settings
 
-		for(var i = 0; i < 42; i++) {
-			if ((i % 7) === 0) {
-				document.write('</ul><ul>');
+		var findWeekDays = function(){
+
+			var newDate = new Date();
+			var weekDays = [];
+			while(newDate.getDay() > 0) {
+				newDate.setDate(newDate.getDate() + 1);
 			}
-			if (i < first_day_month) {
-				document.write('<li class="empty">&nbsp;</li>');
-			} else if (day <= number_of_days_month) { 
-				if (year === selectedYear && month === selectedMonth && day === selectedDay) {
-					document.write('<li class="today">' + day + '</li>');
-					day++
-				} else {
-					document.write('<li>' + day + '</li>');
-					day++
-				}
-			} else {
-				document.write('<li class="empty">&nbsp;</li>');
+
+			while(weekDays.length < 7) {
+			    weekDays.push(newDate.toLocaleString(locale, {weekday: 'short'}));
+			    newDate.setDate(newDate.getDate() + 1);
 			}
+
+			// CONVERTED TO JQUERY
+			$('.wn_datepicker').append('<ul class="wn_weekDays month' + month +'">').attr("data-month", month).attr("data-year", year);
+
+			for(var i = 0; i < 7; i++) {
+				
+				$('.wn_weekDays.month' + month).append('<li>' + weekDays[i] + '</li>');
+				console.log("PASS HERE " + i)
+
+			}
+
+
 		}
-		document.write('</ul></div>');
+
+		var drawDays = function() {
+			var day = 1;
+			var $wn_day_box = [];
+			for(var i = 0; i < 42; i++) {
+				// if ((i % 7) === 0) {
+				// 	document.write('</ul><ul>');
+				// 	var $wn_cal_days = $('');
+				// }
+					if (i < first_day_month) {
+						
+						$wn_day_box.push('<li class="empty">&nbsp;</li>');
+
+					} else if (day <= number_of_days_month) { 
+						if (year === selectedYear && month === selectedMonth && day === selectedDay) {
+
+							$(".wn_week_line").append('<li class="today">' + day + '</li>');
+							day++
+
+						} else {
+							$(".wn_week_line").append('<li>' + day + '</li>');
+							day++
+						}
+					} else {
+						$(".wn_week_line").append('<li class="empty">&nbsp;</li>');
+					}
+			}
+			$wn_day_box.forEach(printEmptyDays);
+		}
+
 		displayInfo();
+		$(".calendar").append($wn_cal_wrap);
+		$(".wn_datepicker").append($wn_cal_header);
+		findWeekDays();
+		$(".wn_datepicker").append('<ul class="wn_week_line">');
+		drawDays();
+
 	}
 
 	
@@ -116,18 +142,17 @@ Datepicker = function(element){
 
 	var __construct = function(){
 		//do some stuff
-		drawMonth(2016, 0)
-		drawMonth(2016, 1)
-		drawMonth(2016, 2)
+		drawMonth(2016, 0);
+		drawMonth(2016, 1);
 	}();
 }
 //initiate object
 var datepicker1 = new Datepicker('element-selector');
 
 $(document).ready(function(){
-	$('.wn_datepicker li').click(function(){
+	$('.wn_datepicker .wn_week_line li').click(function(){
 		$(this).addClass('select');
-		$('.wn_datepicker li').not( $(this) ).removeClass('select');
+		$('.wn_datepicker .wn_week_line li').not( $(this) ).removeClass('select');
 		var selectedDate = $(this).text();
 		console.log(selectedDate);
 	})
