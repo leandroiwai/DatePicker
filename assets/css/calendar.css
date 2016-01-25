@@ -55,6 +55,14 @@ input {
 	padding-bottom: 20px;
 }
 
+.wn_datepicker li.monthsGrid {
+	display: inline-block;
+	width: 33.33%;
+	height: 64px;
+	text-align: center;
+	line-height: 64px;
+}
+
 
 
 

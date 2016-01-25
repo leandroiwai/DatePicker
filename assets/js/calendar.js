@@ -1,13 +1,15 @@
-Datepicker = function(element, config){
+'use strict'
 
-	this.format = 'dd-mm-yyyy';
+var Datepicker = function(element, config){
+
+	this.format = 'fullCalendar';
 	this.startDate = '01-01-2016';
 	this.endDate = '31-12-2016';
 
 	//some variables
 	var date = new Date();
 	var month = date.getMonth();
-	var locale = navigator.locale;
+	var locale;
 	var year = date.getFullYear();
 	var $picker;
 	var $element = $(element);
@@ -16,7 +18,7 @@ Datepicker = function(element, config){
 	var mydatepicker = this;
 	// var number_of_days_month = new Date(year, month + 1, 0).getDate();
 
-	
+
 	
 	this.getDate = function(){
 		return month + '-' + year;
@@ -32,6 +34,10 @@ Datepicker = function(element, config){
 		// 01/0/2016 falls on a 5
 	}
 
+	var getMonthFromString = function(month_shortname){
+	   return new Date(Date.parse(month_shortname +" 1, 2012")).getMonth();
+	}
+
 	var bindClicks = function(el, year, month) {
 		var previous_month;
 		var previous_year = year;
@@ -39,7 +45,10 @@ Datepicker = function(element, config){
 		var next_year = year;
 
 		$('li:not(.empty)', $picker).click(function(){
-			$element.val(year + '/' + parseInt(month + 1) + '/'+ $(this).text());
+			var set_date = new Date(year, parseInt(month), $(this).text());
+			var set_date_locale = set_date.toLocaleDateString(locale)
+			$element.val(set_date_locale);
+
 			$(this).addClass('select');
 			$('li:not(.empty)').not(this).not().removeClass('select');
 			// draw next month.text()
@@ -64,10 +73,20 @@ Datepicker = function(element, config){
 			} else {
 				next_month = month + 1;
 			}
-			drawMonth(next_year, next_month)
+			drawMonth(next_year, next_month);
 		});
-	}
 
+		$('.select_month', $picker).on('change', function(){
+			var month_select = this.value;
+			drawMonth(year, getMonthFromString(month_select));
+		});
+
+		$('.select_year', $picker).on('change', function(){
+			var year_select = this.value;
+			drawMonth(year_select, month);
+		});
+
+	}
 
 	var printEmptyDays = function(element, index, value, year, month) {
 		$('.wn_week_line.time_stamp_' + year + '_' + month, $picker).prepend(element);
@@ -85,12 +104,19 @@ Datepicker = function(element, config){
 		$picker = $('<div class="wn_datepicker"/>');
 		$picker.append(addHeader(year, month));
 		$picker.append(addSelect(year, month));
-		$picker.append(findWeekDays(year, month));
-		$picker.append(drawDays(year, month));
+		if (mydatepicker.format == 'month-year-calendar') {
+			$picker.append(drawMonthGrid(year, month));
+		} else {
+			$picker.append(findWeekDays(year, month));
+			$picker.append(drawDays(year, month));
+		}
+		console.log(mydatepicker.format);
+
 		bindClicks($picker, year, month);
 		$element.after($picker);
 		console.log(mydatepicker.endDate);
 		console.log(this);
+		console.log();
 	}
 
 
@@ -122,22 +148,31 @@ Datepicker = function(element, config){
 		    newDate.setMonth(newDate.getMonth() + 1);
 		}
 
-		for(var i = 0; i < 12; i++) {		
-			$select_month.append('<option>' + monthsNames[i] + '</option>');
+		for(var i = 0; i < 12; i++) {
+			if (i == month) {
+				$select_month.append('<option value="' + monthsNames[i] +'" selected="selected">' + monthsNames[i] + '</option>');
+			} else {
+				$select_month.append('<option value="' + monthsNames[i] +'">' + monthsNames[i] + '</option>');
+			}
 		}
 
 		// add year selector 
-		var newDate = new Date();
-		var years = [];
+		var day_year = new Date();
+		var year_set = day_year.getFullYear();
+		var year_future = year_set + 10;
 		$select_div.append($select_year);
 
-		$select_year.append('<option>AAAA</option>');		
+		for(var i = year_set; i <= year_future; i++) {
+			if (i == year) {
+				$select_year.append('<option value="' + i + '" selected="selected">' + i + '</option>');	
+			} else {
+				$select_year.append('<option value="' + i + '">' + i + '</option>');	
+			}
+			
+		}
 
-		return $select_month.add($select_year);
-
+		return $select_div;
 	}
-
-
 
 	var findWeekDays = function(year, month){
 
@@ -215,20 +250,20 @@ Datepicker = function(element, config){
 		return $days;
 	}
 
-	
-	var attach = function(){
-		//...
+	var drawMonthGrid = function(year, month) {
+
+		var $months = $('<ul class="wn_month_line"/>');
+
+
+		for(var i = 0; i < 12; i++) {
+			var $reset_year = new Date(1, (i + 1), 1);
+			$months.append('<li class="monthsGrid">' + $reset_year.toLocaleString(locale, {month: 'short'}) + '</li>');
+
+		}
+
+		return $months;
 	}
-	var destroy = function(){
-		//...
-	}
-	//some public methods
-	this.show = function(){
-		//...
-	}
-	this.hide = function(){
-		//...
-	}
+
 
 	var __construct = function(that){
 		if(typeof config != 'undefined'){
@@ -236,6 +271,18 @@ Datepicker = function(element, config){
 				that[x] = config[x];
 			}
 		}
+
+		// IE
+		if (navigator.browserLanguage) {
+		    locale = navigator.browserLanguage;
+		}
+		// All other vendors
+		else if (navigator.language) {
+			locale = navigator.language;
+		}
+		// Test Only
+		locale = "en-gb"
+
 		drawMonth(year, month);
 	}(this);
 }
@@ -243,17 +290,13 @@ Datepicker = function(element, config){
 
 
 $(document).ready(function(){
-	var config = {
-		format: 'dd-mm-yyyy',
+	window['testpicker'] = new Datepicker('.wn_calendar', {
+		format: 'fullCalendar',
 		startDate: '01-01-2016',
-		endDate : '31-12-2016'
-	}
-	$('.wn_calendar').each(function(ix, val){
-		window['datepicker' + ix] = new Datepicker(this, config);
-
-	})
+		endDate : '10-10-2010'
+	});
 	window['testpicker'] = new Datepicker('.wn_calendar2', {
-		format: 'dd-mm-yyyy',
+		format: 'month-year-calendar',
 		startDate: '01-01-2016',
 		endDate : '10-10-2010'
 	});
