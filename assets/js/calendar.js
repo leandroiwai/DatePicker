@@ -14,7 +14,6 @@ var Datepicker = function(element, config){
 	var $picker;
 	var $element = $(element);
 
-
 	var mydatepicker = this;
 	// var number_of_days_month = new Date(year, month + 1, 0).getDate();
 
@@ -44,14 +43,28 @@ var Datepicker = function(element, config){
 		var next_month;
 		var next_year = year;
 
-		$('li:not(.empty)', $picker).click(function(){
+
+		$('.wn_week_line li:not(.empty)', $picker).click(function(){
 			var set_date = new Date(year, parseInt(month), $(this).text());
 			var set_date_locale = set_date.toLocaleDateString(locale)
 			$element.val(set_date_locale);
 
 			$(this).addClass('select');
-			$('li:not(.empty)').not(this).not().removeClass('select');
+			$('li:not(.empty)').not(this).removeClass('select');
 			// draw next month.text()
+		});
+
+		$('.wn_month_line li', $picker).click(function(){
+			var date = new Date();
+			var set_month = $(this).attr('data-month');
+			var set_year = $(this).attr('data-year');
+			$element.val(parseInt(set_month) + 1 + '/' + set_year);
+			$(this).addClass('select');
+			$('li:not(.empty)').not(this).removeClass('select');
+
+
+			// change value on select element
+			$('.select_month option[value="'+ set_month +'"]').attr('selected', 'selected');
 		});
 
 
@@ -76,10 +89,18 @@ var Datepicker = function(element, config){
 			drawMonth(next_year, next_month);
 		});
 
-		$('.select_month', $picker).on('change', function(){
-			var month_select = this.value;
-			drawMonth(year, getMonthFromString(month_select));
-		});
+		if (mydatepicker.format != 'fullCalendar') {
+			$('.select_month', $picker).on('change', function(){
+				var month_select = this.value;
+				$('.wn_month_line li').removeClass('select');
+				$('.wn_month_line li[data-month="'+ this.value +'"]').addClass('select');
+			});
+		} else {
+			$('.select_month', $picker).on('change', function(){
+				var month_select = this.value;
+				drawMonth(year, getMonthFromString(month_select));
+			});
+		}
 
 		$('.select_year', $picker).on('change', function(){
 			var year_select = this.value;
@@ -104,19 +125,16 @@ var Datepicker = function(element, config){
 		$picker = $('<div class="wn_datepicker"/>');
 		$picker.append(addHeader(year, month));
 		$picker.append(addSelect(year, month));
-		if (mydatepicker.format == 'month-year-calendar') {
+		if (mydatepicker.format != 'fullCalendar') {
 			$picker.append(drawMonthGrid(year, month));
 		} else {
 			$picker.append(findWeekDays(year, month));
 			$picker.append(drawDays(year, month));
 		}
-		console.log(mydatepicker.format);
 
 		bindClicks($picker, year, month);
 		$element.after($picker);
-		console.log(mydatepicker.endDate);
-		console.log(this);
-		console.log();
+
 	}
 
 
@@ -150,9 +168,9 @@ var Datepicker = function(element, config){
 
 		for(var i = 0; i < 12; i++) {
 			if (i == month) {
-				$select_month.append('<option value="' + monthsNames[i] +'" selected="selected">' + monthsNames[i] + '</option>');
+				$select_month.append('<option value="' + i +'" selected="selected">' + monthsNames[i] + '</option>');
 			} else {
-				$select_month.append('<option value="' + monthsNames[i] +'">' + monthsNames[i] + '</option>');
+				$select_month.append('<option value="' + i +'">' + monthsNames[i] + '</option>');
 			}
 		}
 
@@ -257,7 +275,7 @@ var Datepicker = function(element, config){
 
 		for(var i = 0; i < 12; i++) {
 			var $reset_year = new Date(1, (i + 1), 1);
-			$months.append('<li class="monthsGrid">' + $reset_year.toLocaleString(locale, {month: 'short'}) + '</li>');
+			$months.append('<li class="monthsGrid" data-month="' + i + '" data-year="' + year + '">' + $reset_year.toLocaleString(locale, {month: 'short'}) + '</li>');
 
 		}
 
@@ -281,7 +299,7 @@ var Datepicker = function(element, config){
 			locale = navigator.language;
 		}
 		// Test Only
-		locale = "en-gb"
+		locale = "pl-pl"
 
 		drawMonth(year, month);
 	}(this);
@@ -292,12 +310,12 @@ var Datepicker = function(element, config){
 $(document).ready(function(){
 	window['testpicker'] = new Datepicker('.wn_calendar', {
 		format: 'fullCalendar',
-		startDate: '01-01-2016',
+		startDate: '20-12-2016',
 		endDate : '10-10-2010'
 	});
 	window['testpicker'] = new Datepicker('.wn_calendar2', {
 		format: 'month-year-calendar',
-		startDate: '01-01-2016',
+		startDate: 'today',
 		endDate : '10-10-2010'
 	});
 
