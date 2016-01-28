@@ -16,9 +16,8 @@ var Datepicker = function(element, config){
 
 	var mydatepicker = this;
 
-
-
-
+	var prev_arrow_image = 'assets/images/arrow_prev.svg';
+	var next_arrow_image = 'assets/images/arrow_next.svg'
 
 	
 	this.getDate = function(){
@@ -39,11 +38,14 @@ var Datepicker = function(element, config){
 	   return new Date(Date.parse(month_shortname +" 1, 2012")).getMonth();
 	}
 
-	var bindClicks = function(el, year, month) {
+	var bindClicks = function(year, month) {
 		var previous_month;
 		var previous_year = year;
 		var next_month;
 		var next_year = year;
+
+		// var visible = $element.next('.wn_datepicker').is(':visible');
+
 
 
 		$('.wn_week_line li:not(.empty)', $picker).click(function(){
@@ -53,7 +55,9 @@ var Datepicker = function(element, config){
 
 			$(this).addClass('select');
 			$('li:not(.empty)').not(this).removeClass('select');
+
 			// draw next month.text()
+			$picker.hide();
 		});
 
 		$('.wn_month_line li', $picker).click(function(){
@@ -63,10 +67,12 @@ var Datepicker = function(element, config){
 			$element.val(parseInt(set_month) + 1 + '/' + set_year);
 			$(this).addClass('select');
 			$('li:not(.empty)').not(this).removeClass('select');
-
+			
 
 			// change value on select element
 			$('.select_month option[value="'+ set_month +'"]').attr('selected', 'selected');
+
+			$picker.hide();
 		});
 
 
@@ -121,10 +127,18 @@ var Datepicker = function(element, config){
 
 	// end of Get week names using locale settings
 
-	var drawMonth = function(year, month){	
+
+	var drawMonth = function(year, month){
+
+		var visible = $element.next('.wn_datepicker').is(':visible');
+
 		$element.next('.wn_datepicker').remove();
-		displayInfo();
 		$picker = $('<div class="wn_datepicker"/>');
+		$picker.toggle(visible);
+
+
+		displayInfo();
+
 		$picker.append(addHeader(year, month));
 		$picker.append(addSelect(year, month));
 		if (mydatepicker.format != 'fullCalendar') {
@@ -134,8 +148,9 @@ var Datepicker = function(element, config){
 			$picker.append(drawDays(year, month));
 		}
 
-		bindClicks($picker, year, month);
+		
 		$element.after($picker);
+		bindClicks(year, month);
 
 	}
 
@@ -168,15 +183,15 @@ var Datepicker = function(element, config){
 
 		if (mydatepicker.startDate.length > 0 || mydatepicker.endDate.length > 0) {
 			if (compare_start_date > day) {
-				return $('<div class="wn_datepicker_header time_stamp_' + year + '_' + month + '">' + month_name + ' ' + year + '<span class="wn_next_month">&raquo;</span></div>');
+				return $('<div class="wn_datepicker_header time_stamp_' + year + '_' + month + '">' + month_name + ' ' + year + '<span class="wn_next_month"><img src="' + next_arrow_image + '"></span></div>');
 			} else if (compare_end_date < day){
-				return $('<div class="wn_datepicker_header time_stamp_' + year + '_' + month + '"><span class="wn_prev_month">&laquo;</span>' + month_name + ' ' + year + '</div>');
+				return $('<div class="wn_datepicker_header time_stamp_' + year + '_' + month + '"><span class="wn_prev_month"><img src="' + prev_arrow_image + '"></span>' + month_name + ' ' + year + '</div>');
 			} else {
-				return $('<div class="wn_datepicker_header time_stamp_' + year + '_' + month + '"><span class="wn_prev_month">&laquo;</span>' + month_name + ' ' + year + '<span class="wn_next_month">&raquo;</span></div>');
+				return $('<div class="wn_datepicker_header time_stamp_' + year + '_' + month + '"><span class="wn_prev_month"><img src="' + prev_arrow_image + '"></span>' + month_name + ' ' + year + '<span class="wn_next_month"><img src="' + next_arrow_image + '"></span></div>');
 			}
 			
 		} else {
-			return $('<div class="wn_datepicker_header time_stamp_' + year + '_' + month + '"><span class="wn_prev_month">&laquo;</span>' + month_name + ' ' + year + '<span class="wn_next_month">&raquo;</span></div>');
+			return $('<div class="wn_datepicker_header time_stamp_' + year + '_' + month + '"><span class="wn_prev_month"><img src="' + prev_arrow_image + '"></span>' + month_name + ' ' + year + '<span class="wn_next_month"><img src="' + next_arrow_image + '"></span></div>');
 		}
 		
 	}
@@ -252,8 +267,6 @@ var Datepicker = function(element, config){
 				}
 			}
 		}
-
-
 
 
 		return $select_div;
@@ -398,6 +411,19 @@ var Datepicker = function(element, config){
 		} else {
 			drawMonth(year, month);
 		}
+
+		$element.click(function(){
+			var visible = $picker.is(':visible');
+			$('.wn_datepicker').not($picker).hide();
+			$element.next($picker).toggle(!visible);
+		});
+
+		$('html').off().on('click', function(el){
+			if($(el.target).closest('.wn_datepicker').length == 0 && $(el.target).next('.wn_datepicker').length == 0){
+			   $('.wn_datepicker').hide();
+			}
+			console.log(el);
+		});
 		
 	}(this);
 }

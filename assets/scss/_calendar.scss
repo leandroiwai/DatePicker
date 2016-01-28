@@ -17,6 +17,9 @@ input {
 	border-radius: 3px;
 	font-size: 12px;
 	margin-top: 20px;
+	&:focus {
+		outline: none;
+	}
 }
 
 // Start of wn_datepicker
@@ -25,7 +28,22 @@ input {
 	background: #ffffff; 					// CHANGE COLOUR TO COLOUR ASSETS
 	border-radius: 3px;
 	box-shadow: 0px 4px 0px 0px #d2d3d5;	// CHANGE COLOUR TO COLOUR ASSETS
-	max-width: 320px;
+	width: 320px;
+	position: absolute;
+	display: none;
+	margin-top: 4px;
+	&::after {
+		bottom: 100%;
+		left: 50%;
+		border: solid transparent;
+		content: "";
+		height: 0;
+		width: 0;
+		position: absolute;
+		border-bottom-color: #4fc0e8;		// CHANGE COLOUR TO COLOUR ASSETS
+		border-width: 8px;
+		margin-left: -145px;
+	}
 	ul {
 		margin: 0px;
 		padding: 0px;
@@ -58,6 +76,14 @@ input {
 		.wn_next_month {
 			position: absolute;
 			right: 10px;
+
+		}
+		.wn_prev_month,
+		.wn_next_month {
+			img {
+				width: 15px;
+				margin-top: 17px;
+			}
 		}
 	}
 	.wn_weekDays_line {
@@ -96,7 +122,7 @@ input {
 
 .calendar {
 	margin-bottom: 20px;
-	border-bottom: 5px solid #e9e9e9;
+	border-bottom: 5px solid #e9e9e9;		// CHANGE COLOUR TO COLOUR ASSETS
 	padding-bottom: 20px;
 }
 
