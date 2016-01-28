@@ -15,7 +15,9 @@ var Datepicker = function(element, config){
 	var $element = $(element);
 
 	var mydatepicker = this;
-	// var number_of_days_month = new Date(year, month + 1, 0).getDate();
+
+
+
 
 
 	
@@ -140,11 +142,43 @@ var Datepicker = function(element, config){
 
 	var addHeader = function(year, month){
 		var day = new Date();
+		var day_month = day.getMonth();
+		var day_year = day.getFullYear();
+
 		day.setMonth(month);
 		day.setYear(year);
 		day.setDate(1);	
 		var month_name = day.toLocaleString(locale, { month: "short" });
-		return $('<div class="wn_datepicker_header time_stamp_' + year + '_' + month + '"><span class="wn_prev_month">&laquo;</span>' + month_name + ' ' + year + '<span class="wn_next_month">&raquo;</span></div>');
+
+		// set date limits to arrow navigation
+		var start_date = mydatepicker.startDate.split("-");
+		var start_year = parseInt(start_date[2]);
+		var start_month = parseInt(start_date[1] - 1);
+		var start_day = parseInt(start_date[0]);
+		var compare_start_date = new Date();
+		compare_start_date.setFullYear(start_year,start_month,start_day);
+
+
+		var end_date = mydatepicker.endDate.split("-");
+		var end_year = parseInt(end_date[2]);
+		var end_month = parseInt(end_date[1] - 2);
+		var end_day = parseInt(end_date[0]);
+		var compare_end_date = new Date();
+		compare_end_date.setFullYear(end_year,end_month,end_day);
+
+		if (mydatepicker.startDate.length > 0 || mydatepicker.endDate.length > 0) {
+			if (compare_start_date > day) {
+				return $('<div class="wn_datepicker_header time_stamp_' + year + '_' + month + '">' + month_name + ' ' + year + '<span class="wn_next_month">&raquo;</span></div>');
+			} else if (compare_end_date < day){
+				return $('<div class="wn_datepicker_header time_stamp_' + year + '_' + month + '"><span class="wn_prev_month">&laquo;</span>' + month_name + ' ' + year + '</div>');
+			} else {
+				return $('<div class="wn_datepicker_header time_stamp_' + year + '_' + month + '"><span class="wn_prev_month">&laquo;</span>' + month_name + ' ' + year + '<span class="wn_next_month">&raquo;</span></div>');
+			}
+			
+		} else {
+			return $('<div class="wn_datepicker_header time_stamp_' + year + '_' + month + '"><span class="wn_prev_month">&laquo;</span>' + month_name + ' ' + year + '<span class="wn_next_month">&raquo;</span></div>');
+		}
+		
 	}
 
 	var addSelect = function(year, month){
@@ -180,14 +214,47 @@ var Datepicker = function(element, config){
 		var year_future = year_set + 10;
 		$select_div.append($select_year);
 
-		for(var i = year_set; i <= year_future; i++) {
-			if (i == year) {
-				$select_year.append('<option value="' + i + '" selected="selected">' + i + '</option>');	
-			} else {
-				$select_year.append('<option value="' + i + '">' + i + '</option>');	
+		// set date limits to arrow navigation
+		var start_date = mydatepicker.startDate.split("-");
+		var start_year = parseInt(start_date[2]);
+		var start_month = parseInt(start_date[1] - 1);
+		var start_day = parseInt(start_date[0]);
+		var compare_start_date = new Date();
+		compare_start_date.setFullYear(start_year,start_month,start_day);
+
+		//end date settings
+		var end_date = mydatepicker.endDate.split("-");
+		var end_year = parseInt(end_date[2]);
+		var end_month = parseInt(end_date[1] - 1);
+		var end_day = parseInt(end_date[0]);
+		var compare_end_date = new Date();
+		compare_end_date.setFullYear(end_year,end_month,end_day);
+
+
+		if (mydatepicker.startDate.length > 0) {
+
+			var start_end_year_diff = parseInt(end_year) - parseInt(start_year);
+
+			for(var i = start_year; i <= end_year; i++) {
+				if (i == year) {
+					$select_year.append('<option value="' + i + '" selected="selected">' + i + '</option>');	
+				} else {
+					$select_year.append('<option value="' + i + '">' + i + '</option>');	
+				}			
 			}
-			
+
+		} else {
+			for(var i = year_set; i <= year_future; i++) {
+				if (i == year) {
+					$select_year.append('<option value="' + i + '" selected="selected">' + i + '</option>');	
+				} else {
+					$select_year.append('<option value="' + i + '">' + i + '</option>');	
+				}
+			}
 		}
+
+
+
 
 		return $select_div;
 	}
@@ -216,7 +283,6 @@ var Datepicker = function(element, config){
 	}
 
 	var drawDays = function(year, month) {
-
 		var $days = $('<ul class="wn_week_line time_stamp_' + year + '_' + month +'"/>');
 		var selectedDay 	= date.getDate();
 		var selectedMonth 	= date.getMonth();
@@ -244,17 +310,40 @@ var Datepicker = function(element, config){
 		var $wn_day_box = [];
 		var last_month_days;
 		last_month_days = number_of_days_previous_month - (first_day_month - 1);
+
+		//start date settings
+		var start_date = mydatepicker.startDate.split("-");
+		var start_year = parseInt(start_date[2]);
+		var start_month = parseInt(start_date[1] - 1);
+		var start_day = parseInt(start_date[0]);
+
+		var compare_today = new Date();
+		var compare_start_date = new Date();
+		compare_start_date.setFullYear(start_year,start_month,start_day);
+
+		//end date settings
+		var end_date = mydatepicker.endDate.split("-");
+		var end_year = parseInt(end_date[2]);
+		var end_month = parseInt(end_date[1] - 1);
+		var end_day = parseInt(end_date[0]);
+		var compare_end_date = new Date();
+		compare_end_date.setFullYear(end_year,end_month,end_day);
+
 		for(var i = 0; i < 42; i++) {
+
 			if (i < first_day_month) {
 				
 				$days.append('<li class="empty">' + last_month_days + '</li>');
 				last_month_days++;
 
 			} else if (day <= number_of_days_month) { 
+				compare_today.setFullYear(year,month,day);
 				if (year === selectedYear && month === selectedMonth && day === selectedDay) {
 					$days.append('<li class="today">' + day + '</li>');
 					day++
-
+				} else if (compare_start_date > compare_today || compare_end_date < compare_today) {
+					$days.append('<li class="disabled">' + day + '</li>');
+					day++
 				} else {
 					$days.append('<li>' + day + '</li>');
 					day++
@@ -289,7 +378,6 @@ var Datepicker = function(element, config){
 				that[x] = config[x];
 			}
 		}
-
 		// IE
 		if (navigator.browserLanguage) {
 		    locale = navigator.browserLanguage;
@@ -299,9 +387,18 @@ var Datepicker = function(element, config){
 			locale = navigator.language;
 		}
 		// Test Only
-		locale = "pl-pl"
+		locale = "pt-br"
 
-		drawMonth(year, month);
+		var start_date = mydatepicker.startDate.split("-");
+		var start_year = parseInt(start_date[2]);
+		var start_month = parseInt(start_date[1] - 1);
+
+		if (mydatepicker.startDate.length > 0) {
+			drawMonth(start_year, start_month);
+		} else {
+			drawMonth(year, month);
+		}
+		
 	}(this);
 }
 //initiate object
@@ -310,13 +407,13 @@ var Datepicker = function(element, config){
 $(document).ready(function(){
 	window['testpicker'] = new Datepicker('.wn_calendar', {
 		format: 'fullCalendar',
-		startDate: '20-12-2016',
-		endDate : '10-10-2010'
+		startDate: '20-1-2016',
+		endDate : '25-6-2017'
 	});
 	window['testpicker'] = new Datepicker('.wn_calendar2', {
 		format: 'month-year-calendar',
-		startDate: 'today',
-		endDate : '10-10-2010'
+		startDate: '20-1-2016',
+		endDate : '25-6-2017'
 	});
 
 });
